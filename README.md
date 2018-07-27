@@ -26,6 +26,7 @@ Sometimes, cap may not have initialized the capture. In that case, this code sho
 **When everything done, release the capture**
  
  ###                        cap.release()
+ 
  ---
  
  
@@ -54,7 +55,8 @@ Defining the range of the specific color of the object so we can detect it. We w
 
 * Python: cv.Flip(src, dst=None, flipMode=0) → None
 
-### Parameters:	
+### Parameters:
+
 1. src – input array.
 
 2. dst – output array of the same size and type as src.
@@ -96,6 +98,7 @@ We should specify the width and height of kernel which should be positive and od
  <p align="center"> 
 <img src="https://docs.opencv.org/3.1.0/gaussian.jpg">
 </p>
+ 
  ---
  
  ##  6.       hsv = cv2.cvtColor(frame2, cv2.COLOR_BGR2HSV)
@@ -147,7 +150,7 @@ In specifying the range , we have specified the range of blue color. Whereas you
 
 * **Python**: cv.InRangeS(src, lower, upper, dst) → None
 
-###Parameters:	
+### Parameters:	
 
 * src – first input array.
 * lowerb – inclusive lower boundary array or a scalar.
@@ -156,13 +159,13 @@ In specifying the range , we have specified the range of blue color. Whereas you
 
 * The function checks the range as follows:
 
-..* For every element of a single-channel input array:
+> For every element of a single-channel input array:
 
 <p align="center"> 
 <img src="https://docs.opencv.org/2.4/_images/math/daa7c2be6be83bad04d6ef7cfff4b2a7b8a43b52.png">
 </p>
 
-..* For two-channel arrays:
+> For two-channel arrays:
 
 <p align="center"> 
 <img src="https://docs.opencv.org/2.4/_images/math/3de50754e0df6fd0dac51df248e783b152083cef.png">
