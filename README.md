@@ -174,6 +174,228 @@ That is, dst (I) is set to 255 (all 1 -bits) if src (I) is within the specified 
 
 When the lower and/or upper boundary parameters are scalars, the indexes (I) at lowerb and upperb in the above formulas should be omitted.
 
+## 8. res = cv2.bitwise_and( frame2, frame2, mask = mask)
+
+**Bitwise Operations**
+
+This includes bitwise AND, OR, NOT and XOR operations. They will be highly useful while extracting any part of the image (as we will see in coming chapters), defining and working with non-rectangular ROI etc. Below we will see an example on how to change a particular region of an image.
+
+```
+import cv2
+
+## Read
+img = cv2.imread("sunflower.jpg")
+
+## convert to hsv
+hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+## mask of green (36,0,0) ~ (70, 255,255)
+mask1 = cv2.inRange(hsv, (36, 0, 0), (70, 255,255))
+
+## mask o yellow (15,0,0) ~ (36, 255, 255)
+mask2 = cv2.inRange(hsv, (15,0,0), (36, 255, 255))
+
+## final mask and masked
+mask = cv2.bitwise_or(mask1, mask2)
+target = cv2.bitwise_and(img,img, mask=mask)
+
+cv2.imwrite("target.png", target)
+```
+This code above using bitwise_or and bitwise_and.
+
+<p align="center"> 
+<img src="https://i.stack.imgur.com/CMEaA.jpg">
+</p>
+
+Find green and yellow(the range is not that accurate):
+
+<p align="center"> 
+<img src="https://i.stack.imgur.com/8ydJj.png">
+</p>
+
+---
+
+## 9. kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
+
+In some cases, you may need elliptical/circular shaped kernels. So for this purpose, OpenCV has a function, cv2.getStructuringElement(). You just pass the shape and size of the kernel, you get the desired kernel.
+
+```
+# Rectangular Kernel
+>>> cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
+array([[1, 1, 1, 1, 1],
+       [1, 1, 1, 1, 1],
+       [1, 1, 1, 1, 1],
+       [1, 1, 1, 1, 1],
+       [1, 1, 1, 1, 1]], dtype=uint8)
+
+# Elliptical Kernel
+>>> cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
+array([[0, 0, 1, 0, 0],
+       [1, 1, 1, 1, 1],
+       [1, 1, 1, 1, 1],
+       [1, 1, 1, 1, 1],
+       [0, 0, 1, 0, 0]], dtype=uint8)
+
+# Cross-shaped Kernel
+>>> cv2.getStructuringElement(cv2.MORPH_CROSS,(5,5))
+array([[0, 0, 1, 0, 0],
+       [0, 0, 1, 0, 0],
+       [1, 1, 1, 1, 1],
+       [0, 0, 1, 0, 0],
+       [0, 0, 1, 0, 0]], dtype=uint8)
+```
+---
+
+## 10. opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+# Morphological Transformations
+
+**Theory**
+
+* Morphological transformations are some simple operations based on the image shape. 
+* It is normally performed on binary images. 
+* It needs two inputs, one is our original image, second one is called structuring element or kernel which decides the nature of operation. 
+* Two basic morphological operators are Erosion and Dilation. Then its variant forms like Opening, Closing, Gradient etc also comes into play. 
+
+We will see them one-by-one with help of following image:
+
+<p align="center"> 
+<img src="https://docs.opencv.org/3.0-beta/_images/j.png">
+</p>
+
+1. **Erosion**
+
+The basic idea of erosion is just like soil erosion only, it erodes away the boundaries of foreground object (Always try to keep foreground in white). So what it does? The kernel slides through the image (as in 2D convolution). A pixel in the original image (either 1 or 0) will be considered 1 only if all the pixels under the kernel is 1, otherwise it is eroded (made to zero).
+
+So what happends is that, all the pixels near boundary will be discarded depending upon the size of kernel. So the thickness or size of the foreground object decreases or simply white region decreases in the image. It is useful for removing small white noises detach two connected objects etc.
+
+Here, as an example, I would use a 5x5 kernel with full of ones. Let’s see it how it works:
+```
+import cv2
+import numpy as np
+
+img = cv2.imread('j.png',0)
+kernel = np.ones((5,5),np.uint8)
+erosion = cv2.erode(img,kernel,iterations = 1)
+```
+Result:
+
+<p align="center"> 
+<img src="https://docs.opencv.org/3.0-beta/_images/erosion.png">
+</p>
+
+2. **Dilation**
+
+It is just opposite of erosion. Here, a pixel element is ‘1’ if atleast one pixel under the kernel is ‘1’. So it increases the white region in the image or size of foreground object increases. Normally, in cases like noise removal, erosion is followed by dilation. Because, erosion removes white noises, but it also shrinks our object. So we dilate it. Since noise is gone, they won’t come back, but our object area increases. It is also useful in joining broken parts of an object.
+
+```dilation = cv2.dilate(img,kernel,iterations = 1)```
+
+Result:
+
+<p align="center"> 
+<img src="https://docs.opencv.org/3.0-beta/_images/dilation.png">
+</p>
+
+3. **Opening**
+
+Opening is just another name of erosion followed by dilation. It is useful in removing noise, as we explained above. Here we use the function, cv2.morphologyEx()
+
+```opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)```
+
+Result:
+
+<p align="center"> 
+<img src="https://docs.opencv.org/3.0-beta/_images/opening.png">
+</p>
+
+4. **Closing**
+Closing is reverse of Opening, Dilation followed by Erosion. It is useful in closing small holes inside the foreground objects, or small black points on the object.
+
+```closing = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)```
+
+Result:
+
+<p align="center"> 
+<img src="https://docs.opencv.org/3.0-beta/_images/opening.png">
+</p>
+
+5. **Morphological Gradient**
+
+It is the difference between dilation and erosion of an image.
+
+The result will look like the outline of the object.
+
+```gradient = cv2.morphologyEx(img, cv2.MORPH_GRADIENT, kernel)```
+
+Result:
+<p align="center"> 
+<img src="https://docs.opencv.org/3.0-beta/_images/gradient.png">
+</p>
+
+
+## 11. center = (int(moment['m10']/moment['m00']), int(moment['m01']/moment['m00']))
+
+
+Moments
+===========
+
+One of the simplest ways to compare two contours is to compute contour moments. 
+
+This is a good time for a short digression into precisely what a moment is. Loosely speaking, a moment is a gross characteristic of the contour computed by integrating (or summing, if you like) over all of the pixels of the contour. In general, we defi ne the (p, q) moment of a contour as
+
+<p align="center"> 
+<img src="https://github.com/varshneydevansh/object-detect-opencv/blob/master/opencv.png">
+</p>
+
+Image moments help you to calculate some features like center of mass of the object, area of the object etc. Check out the wikipedia page on `Image Moments <http://en.wikipedia.org/wiki/Image_moment>`_
+
+The function **cv2.moments()** gives a dictionary of all moment values calculated. See below:
+::
+
+    import cv2
+    import numpy as np
+
+    img = cv2.imread('star.jpg',0)
+    ret,thresh = cv2.threshold(img,127,255,0)
+    contours,hierarchy = cv2.findContours(thresh, 1, 2)
+
+    cnt = contours[0]
+    M = cv2.moments(cnt)
+    print M    
+    
+From this moments, you can extract useful data like area, centroid etc. Centroid is given by the relations, . 
+
+This can be done as follows:
+::
+
+    cx = int(M['m10']/M['m00'])
+    cy = int(M['m01']/M['m00'])
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
